@@ -7,17 +7,18 @@ using UnityEngine.UI;
 public class MainManager : MonoBehaviour
 {
     public Brick BrickPrefab;
-    public int LineCount = 7;
+    public int LineCount = 6;
     public Rigidbody Ball;
 
+    public Text HighScoreText;
     public Text ScoreText;
+    public Text PlayerNameText;
     public GameObject GameOverText;
     
     private bool m_Started = false;
     private int m_Points;
     
     private bool m_GameOver = false;
-
     
     // Start is called before the first frame update
     void Start()
@@ -35,6 +36,12 @@ public class MainManager : MonoBehaviour
                 brick.PointValue = pointCountArray[i];
                 brick.onDestroyed.AddListener(AddPoint);
             }
+        }
+
+        if (GameManager.Instance != null)
+        {
+            PlayerNameText.text = GameManager.Instance.CurrentPlayer;
+            HighScoreText.text = "High Score : " + GameManager.Instance.HighPlayer + " : " + GameManager.Instance.HighScore;
         }
     }
 
@@ -57,7 +64,16 @@ public class MainManager : MonoBehaviour
         {
             if (Input.GetKeyDown(KeyCode.Space))
             {
+                GameManager.Instance.LastPlayer = GameManager.Instance.CurrentPlayer;
+                GameManager.Instance.LastGameScore = m_Points;
                 SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+            }
+
+            if (Input.GetKeyDown(KeyCode.Escape))
+            {
+                GameManager.Instance.LastPlayer = GameManager.Instance.CurrentPlayer;
+                GameManager.Instance.LastGameScore = m_Points;
+                SceneManager.LoadScene(0);
             }
         }
     }
@@ -66,6 +82,12 @@ public class MainManager : MonoBehaviour
     {
         m_Points += point;
         ScoreText.text = $"Score : {m_Points}";
+        if (m_Points > GameManager.Instance.HighScore)
+        {
+            GameManager.Instance.HighPlayer = GameManager.Instance.CurrentPlayer;
+            GameManager.Instance.HighScore = m_Points;
+            HighScoreText.text = "High Score : " + GameManager.Instance.HighPlayer + " : " + m_Points;
+        }
     }
 
     public void GameOver()
